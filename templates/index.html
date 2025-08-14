@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>📊 Market Scanner</h1>
+    <a href="/scan">🔍 Run Scan</a>
+
+    {% if results %}
+    <ul>
+        {% for item in results %}
+            <li>{{ item.symbol }}: {{ item.price if item.price else 'Error: ' ~ item.error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>
