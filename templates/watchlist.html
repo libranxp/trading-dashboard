@@ -1,0 +1,31 @@
+<div class="watchlist-panel">
+  <h2>📋 Watchlist</h2>
+  <div class="filters">
+    <button onclick="toggleWatchlist()">Toggle: Show All / Watchlist Only</button>
+    <select id="filter-type">
+      <option value="">All</option>
+      <option value="crypto">Crypto</option>
+      <option value="stock">Stock</option>
+    </select>
+    <select id="sort-by">
+      <option value="score">AI Score</option>
+      <option value="last_scan">Last Scan</option>
+    </select>
+  </div>
+  <table class="table-auto w-full mt-4">
+    <thead>
+      <tr>
+        <th>Ticker</th>
+        <th>Type</th>
+        <th>AI Score</th>
+        <th>Sentiment</th>
+        <th>Catalyst</th>
+        <th>Last Scan</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="watchlist-table">
+      <!-- Populated dynamically -->
+    </tbody>
+  </table>
+</div>

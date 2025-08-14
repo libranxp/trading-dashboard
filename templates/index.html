@@ -1,19 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <title>Trading Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-    <h1>📊 Market Scanner</h1>
-    <a href="/scan">🔍 Run Scan</a>
+<body class="bg-gray-900 text-white">
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4">📊 AI Trading Scanner</h1>
 
-    {% if results %}
-    <ul>
-        {% for item in results %}
-            <li>{{ item.symbol }}: {{ item.price if item.price else 'Error: ' ~ item.error }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+    <div class="flex space-x-4 mb-4">
+      <button onclick="runScan()" class="bg-blue-600 px-4 py-2 rounded">🔍 Run Scan</button>
+      <button onclick="toggleAsset()" class="bg-gray-700 px-4 py-2 rounded">🔁 Toggle Asset</button>
+    </div>
+
+    <table class="table-auto w-full bg-gray-800 rounded">
+      <thead>
+        <tr>
+          <th>Ticker</th><th>Score</th><th>Sentiment</th><th>Volume</th><th>Catalyst</th><th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="scan-results"></tbody>
+    </table>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
