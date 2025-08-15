@@ -10,9 +10,4 @@ A fully automated, AI-enhanced trading dashboard for crypto and stocks. Built wi
 - Mobile-first dashboard with Chart.js visualizations
 - Secure deployment via Render with environment variables
 
-## 🛠️ Setup
 
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/your-username/trading-dashboard.git
-   cd trading-dashboard
