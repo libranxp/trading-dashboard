@@ -1,23 +1,13 @@
-from services.scorer import compute_ai_score
-from services.risk import calculate_risk
-from services.validator import validate_signal
+from services.news_service import enrich_with_news
+from services.twitter_service import enrich_with_twitter
+from services.reddit_service import enrich_with_reddit
+from services.polygon_service import enrich_with_polygon
+from services.coingecko_service import enrich_with_coingecko
 
-def enrich_signal(signal):
-    features = {
-        "rsi": signal.get("rsi", 50),
-        "volume": signal.get("volume", 0),
-        "sentiment": 1 if signal.get("sentiment") == "bullish" else 0
-    }
-
-    ai = compute_ai_score(features)
-    risk = calculate_risk(
-        entry_price=signal["price"],
-        atr=signal.get("atr", 100),
-        support=signal.get("support"),
-        resistance=signal.get("resistance")
-    )
-
-    signal.update(ai)
-    signal.update(risk)
-    signal["valid"] = validate_signal(signal)
-    return signal
+def enrich_signals(signals):
+    signals = enrich_with_news(signals)
+    signals = enrich_with_twitter(signals)
+    signals = enrich_with_reddit(signals)
+    signals = enrich_with_polygon(signals)
+    signals = enrich_with_coingecko(signals)
+    return signals

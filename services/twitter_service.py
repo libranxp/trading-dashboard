@@ -1,55 +1,15 @@
 import os
 import requests
 
-TWITTER_BEARER = os.getenv("TWITTER_BEARER_TOKEN")
-HEADERS = {"Authorization": f"Bearer {TWITTER_BEARER}"}
+TWITTER_KEY = os.getenv("TWITTER_KEY")
 
-def enrich_with_twitter(signals):
-    """
-    Enrich each signal with Twitter mention summary.
-
-    Args:
-        signals (list): List of signal dictionaries with 'ticker' or 'name'
-
-    Returns:
-        list: Signals enriched with Twitter summary
-    """
-    if not signals:
-        print("[Twitter] No signals provided.")
-        return []
-
-    enriched = []
-    for signal in signals:
-        query = signal.get("ticker")
-        twitter_data = fetch_twitter_summary(query)
-        signal["twitter_summary"] = twitter_data
-        enriched.append(signal)
-
-    return enriched
-
-
-def fetch_twitter_summary(query):
-    """
-    Fetch recent tweet summary for a given ticker.
-
-    Args:
-        query (str): Ticker symbol
-
-    Returns:
-        str: Summary or placeholder
-    """
+def fetch_twitter_sentiment(ticker):
     try:
-        url = f"https://api.twitter.com/2/tweets/search/recent?query=${query}&max_results=10"
-        response = requests.get(url, headers=HEADERS, timeout=10)
+        url = f"https://api.twitter.com/2/tweets/search/recent?query={ticker}&max_results=10"
+        headers = {"Authorization": f"Bearer {TWITTER_KEY}"}
+        response = requests.get(url, headers=headers)
         tweets = response.json().get("data", [])
-
-        if not tweets:
-            return "No recent tweets found."
-
-        top_tweet = tweets[0]
-        text = top_tweet.get("text", "No content")
-        return f"Top tweet: \"{text[:100]}...\""
-
+        return [t["text"] for t in tweets]
     except Exception as e:
-        print(f"[Twitter] Error fetching tweets: {e}")
-        return "Twitter data unavailable."
+        print(f"[Twitter] Error fetching tweets for {ticker}: {e}")
+        return []

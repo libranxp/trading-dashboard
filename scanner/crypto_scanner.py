@@ -1,31 +1,22 @@
-from services.coingecko_service import scan_crypto
-from services.news_service import enrich_with_news
-from services.twitter_service import enrich_with_twitter
-from services.reddit_service import enrich_with_reddit
-from utils.signal_utils import format_crypto_signal
+import requests, time, os
 
-def scan_crypto():
-    """
-    Scan and enrich crypto signals from CoinGecko and other sources.
+def fetch_crypto_signals():
+    url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
+    headers = {"X-CMC_PRO_API_KEY": os.getenv("COINMARKETCAP_API_KEY")}
+    params = {"limit": 50, "convert": "USD"}
 
-    Returns:
-        list: Fully enriched crypto signal dictionaries
-    """
-    # You can load this from config or DB later
-    crypto_ids = ["bitcoin", "ethereum", "solana", "dogecoin"]
+    response = requests.get(url, headers=headers, params=params)
+    data = response.json().get("data", [])
 
-    raw_metrics = scan_crypto(crypto_ids)
-    raw_signals = [format_crypto_signal(m["ticker"], m) for m in raw_metrics]
-
-    if not raw_signals:
-        print("⚠️ No crypto signals found.")
-        return []
-
-    enriched = enrich_with_news(raw_signals)
-    enriched = enrich_with_twitter(enriched)
-    enriched = enrich_with_reddit(enriched)
-
-    for signal in enriched:
-        signal["type"] = "crypto"
-
-    return enriched
+    signals = []
+    for asset in data:
+        signals.append({
+            "ticker": asset["symbol"],
+            "score": round(asset["quote"]["USD"]["percent_change_24h"], 2),
+            "sentiment": None,
+            "volume": asset["quote"]["USD"]["volume_24h"],
+            "catalyst": None,
+            "time": time.strftime("%H:%M"),
+            "type": "crypto"
+        })
+    return signals

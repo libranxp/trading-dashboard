@@ -1,23 +1,10 @@
-async function runScan() {
-  const res = await fetch('/scan');
-  const data = await res.json();
-  const tbody = document.getElementById('scan-results');
-  tbody.innerHTML = '';
-
-  data.forEach(row => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${row.ticker}</td>
-      <td>${row.score}</td>
-      <td>${row.sentiment}</td>
-      <td>${row.volume}</td>
-      <td>${row.catalyst}</td>
-      <td>${row.time}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+function showTable(type) {
+  document.getElementById('crypto-table').style.display = type === 'crypto' ? 'block' : 'none';
+  document.getElementById('stocks-table').style.display = type === 'stocks' ? 'block' : 'none';
+  document.getElementById('watchlist-table').style.display = type === 'watchlist' ? 'block' : 'none';
 }
 
-function toggleAsset() {
-  alert("Asset type toggled (placeholder)");
+function addToWatchlist(ticker) {
+  fetch(`/watchlist/add/${ticker}`, { method: 'POST' })
+    .then(() => alert(`${ticker} added to watchlist`));
 }

@@ -20,3 +20,6 @@ Thumbs.db
 # Virtual Environments
 venv/
 env/
+
+# Auth Data
+auth/users.json

@@ -1,35 +1,24 @@
-from services.polygon_service import fetch_active_tickers, analyze_ticker
-from services.fmp_service import enrich_with_fmp
-from services.news_service import enrich_with_news
-from services.twitter_service import enrich_with_twitter
-from services.reddit_service import enrich_with_reddit
+import requests, time, os
 
-def scan_stocks():
-    """
-    Scan and enrich stock signals from multiple sources.
+def fetch_stock_signals():
+    url = "https://financialmodelingprep.com/api/v3/stock/list"
+    key = os.getenv("FMP_KEY")
+    response = requests.get(f"{url}?apikey={key}")
+    data = response.json()
 
-    Returns:
-        list: Fully enriched stock signal dictionaries
-    """
-    tickers = fetch_active_tickers()
-    raw_signals = []
+    signals = []
+    for asset in data[:50]:
+        ticker = asset["symbol"]
+        volume = asset.get("volume", 0)
+        score = round(volume / 1e6, 2)
 
-    for ticker in tickers:
-        signal = analyze_ticker(ticker)
-        if signal:
-            raw_signals.append(signal)
-
-    if not raw_signals:
-        print("⚠️ No stock signals passed initial filters.")
-        return []
-
-    # Enrichment pipeline
-    enriched = enrich_with_fmp(raw_signals)
-    enriched = enrich_with_news(enriched)
-    enriched = enrich_with_twitter(enriched)
-    enriched = enrich_with_reddit(enriched)
-
-    for signal in enriched:
-        signal["type"] = "stock"
-
-    return enriched
+        signals.append({
+            "ticker": ticker,
+            "score": score,
+            "sentiment": None,
+            "volume": volume,
+            "catalyst": None,
+            "time": time.strftime("%H:%M"),
+            "type": "stock"
+        })
+    return signals

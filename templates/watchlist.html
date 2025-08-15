@@ -1,31 +1,19 @@
-<div class="watchlist-panel">
-  <h2>📋 Watchlist</h2>
-  <div class="filters">
-    <button onclick="toggleWatchlist()">Toggle: Show All / Watchlist Only</button>
-    <select id="filter-type">
-      <option value="">All</option>
-      <option value="crypto">Crypto</option>
-      <option value="stock">Stock</option>
-    </select>
-    <select id="sort-by">
-      <option value="score">AI Score</option>
-      <option value="last_scan">Last Scan</option>
-    </select>
-  </div>
-  <table class="table-auto w-full mt-4">
-    <thead>
-      <tr>
-        <th>Ticker</th>
-        <th>Type</th>
-        <th>AI Score</th>
-        <th>Sentiment</th>
-        <th>Catalyst</th>
-        <th>Last Scan</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="watchlist-table">
-      <!-- Populated dynamically -->
-    </tbody>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Watchlist Manager</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <h1>⭐ Your Watchlist</h1>
+  <table>
+    <tr><th>Ticker</th><th>Remove</th></tr>
+    {% for ticker in watchlist %}
+    <tr>
+      <td>{{ ticker }}</td>
+      <td><form method="POST" action="/watchlist/remove/{{ ticker }}"><button type="submit">❌</button></form></td>
+    </tr>
+    {% endfor %}
   </table>
-</div>
+</body>
+</html>

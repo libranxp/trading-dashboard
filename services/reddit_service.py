@@ -1,55 +1,21 @@
+import os
 import requests
 
-def enrich_with_reddit(signals):
-    """
-    Enrich each signal with Reddit thread metadata.
+REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
+REDDIT_SECRET = os.getenv("REDDIT_SECRET")
 
-    Args:
-        signals (list): List of signal dictionaries with 'ticker' or 'name'
-
-    Returns:
-        list: Signals enriched with Reddit summary
-    """
-    if not signals:
-        print("[Reddit] No signals provided.")
-        return []
-
-    enriched = []
-    for signal in signals:
-        query = signal.get("name") or signal.get("ticker")
-        reddit_data = fetch_reddit_summary(query)
-        signal["reddit_summary"] = reddit_data
-        enriched.append(signal)
-
-    return enriched
-
-
-def fetch_reddit_summary(query):
-    """
-    Fetch Reddit thread summary for a given query.
-
-    Args:
-        query (str): Search term
-
-    Returns:
-        str: Summary or placeholder
-    """
+def fetch_reddit_mentions(ticker):
     try:
-        url = f"https://www.reddit.com/search.json?q={query}&limit=5"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers, timeout=10)
-        data = response.json().get("data", {}).get("children", [])
+        headers = {"User-Agent": "trading-dashboard"}
+        auth = requests.auth.HTTPBasicAuth(REDDIT_CLIENT_ID, REDDIT_SECRET)
+        data = {"grant_type": "client_credentials"}
+        token = requests.post("https://www.reddit.com/api/v1/access_token", auth=auth, data=data, headers=headers).json()["access_token"]
 
-        if not data:
-            return "No Reddit threads found."
-
-        top_post = data[0]["data"]
-        title = top_post.get("title", "No title")
-        score = top_post.get("score", 0)
-        comments = top_post.get("num_comments", 0)
-
-        return f"Top thread: \"{title}\" | Score: {score} | Comments: {comments}"
-
+        headers["Authorization"] = f"bearer {token}"
+        url = f"https://oauth.reddit.com/search?q={ticker}&limit=5"
+        response = requests.get(url, headers=headers)
+        posts = response.json().get("data", {}).get("children", [])
+        return [p["data"]["title"] for p in posts]
     except Exception as e:
-        print(f"[Reddit] Error fetching threads: {e}")
-        return "Reddit data unavailable."
+        print(f"[Reddit] Error fetching mentions for {ticker}: {e}")
+        return []

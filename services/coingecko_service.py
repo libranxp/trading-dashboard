@@ -1,54 +1,25 @@
 import requests
+from services.coinmarketcap_service import fetch_price_cmc
 
-def scan_crypto(tickers):
+def fetch_price_coingecko(ticker):
     """
-    Fetch market data for a list of CoinGecko tickers.
+    Try Coingecko first, fallback to CoinMarketCap.
 
     Args:
-        tickers (list): List of CoinGecko coin IDs (e.g. ['bitcoin', 'ethereum'])
+        ticker (str): Coingecko ID or symbol
 
     Returns:
-        list: List of dictionaries containing market data for each coin
+        float: USD price
     """
-    if not tickers:
-        print("[CoinGecko] No tickers provided.")
-        return []
-
-    url = "https://api.coingecko.com/api/v3/coins/markets"
-    params = {
-        "vs_currency": "usd",
-        "ids": ",".join(tickers),
-        "order": "market_cap_desc",
-        "per_page": len(tickers),
-        "page": 1,
-        "sparkline": False,
-        "price_change_percentage": "24h"
-    }
-
     try:
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={ticker}&vs_currencies=usd"
+        response = requests.get(url, timeout=10)
         data = response.json()
-
-        signals = []
-        for coin in data:
-            signal = {
-                "ticker": coin.get("id"),
-                "name": coin.get("name"),
-                "symbol": coin.get("symbol"),
-                "price": coin.get("current_price"),
-                "price_change_24h": coin.get("price_change_percentage_24h"),
-                "volume": coin.get("total_volume"),
-                "market_cap": coin.get("market_cap"),
-                "last_updated": coin.get("last_updated")
-            }
-            signals.append(signal)
-
-        return signals
-
-    except requests.exceptions.RequestException as e:
-        print(f"[CoinGecko] Request error: {e}")
-        return []
+        price = data.get(ticker, {}).get("usd", 0)
+        if price > 0:
+            return price
+        else:
+            return fetch_price_cmc(ticker)
     except Exception as e:
-        print(f"[CoinGecko] Unexpected error: {e}")
-        return []
+        print(f"[Coingecko] Error for {ticker}, trying CMC: {e}")
+        return fetch_price_cmc(ticker)
